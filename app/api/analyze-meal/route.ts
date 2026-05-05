@@ -38,7 +38,14 @@ const CONDITION_CONTEXT: Record<HealthCondition, string> = {
 - Keep advice practical and encouraging`,
 };
 
-function buildPrompt(profile: UserProfile, mealType: string, mealText: string, mood?: string): string {
+function buildPrompt(
+  profile: UserProfile,
+  mealType: string,
+  mealText: string,
+  mood?: string,
+  cycleContext?: string,
+  recentMeals?: string
+): string {
   const conditionContexts = profile.conditions
     .map((c) => CONDITION_CONTEXT[c])
     .join("\n\n");
@@ -47,12 +54,13 @@ function buildPrompt(profile: UserProfile, mealType: string, mealText: string, m
 
 USER PROFILE:
 - Name: ${profile.name}
-- Age: ${profile.age}
+- Age: ${profile.age}, Gender: ${profile.gender}
 - Health conditions/goals: ${profile.conditions.join(", ")}
 - Diet preference: ${profile.dietPreference}
 - Cuisine preference: ${profile.cuisinePreference}
 - Lifestyle: ${profile.lifestyle}
 - Main goal: ${profile.mainGoal}
+${cycleContext ? `\n${cycleContext}` : ""}
 
 CONDITION-SPECIFIC GUIDANCE:
 ${conditionContexts}
@@ -81,9 +89,17 @@ IMPORTANT RULES:
 - Focus on progress, not perfection
 - Keep the "gentle note" uplifting and non-judgmental
 
+CULINARY REALISM RULES (CRITICAL — follow strictly):
+- ONLY suggest food combinations that people actually cook and eat together. Never suggest adding a raw ingredient to a dish where it makes no culinary sense (do NOT say "add spinach to dahi", "add flaxseeds to chai", "sprinkle turmeric on fruit", etc.).
+- betterVersion must be a real, recognisable dish or a realistic upgraded version of the original — e.g. if they had "poha", a better version is "poha with added peanuts and a boiled egg on the side", NOT "poha blended with spinach powder".
+- smallFix must be immediately actionable and realistic: swap one ingredient, add a side dish, reduce a portion, or drink something alongside. Never mix ingredients that don't belong together.
+- For Indian cuisine: respect traditional pairings. Dal goes with rice or roti. Dahi is a side. Vegetables are sabji or added to dal — not raw-tossed into every dish. Suggest nuts as a snack, not stirred into meals.
+- If unsure whether a suggestion is realistic, default to safe options: "have a small kachumber salad on the side", "add a handful of mixed nuts as a snack", or "swap white rice for brown rice".
+
 MEAL TO ANALYZE:
 - Meal type: ${mealType}
 - What they ate: ${mealText}${mood ? `\n- How they're feeling: ${mood}` : ""}
+${recentMeals ? `\nRECENT MEAL HISTORY (for context — use this to give balanced tomorrow suggestions):\n${recentMeals}` : ""}
 
 Respond with ONLY a valid JSON object — no markdown, no code fences, no extra text:
 {
@@ -93,13 +109,14 @@ Respond with ONLY a valid JSON object — no markdown, no code fences, no extra 
   "conditionAwareFeedback": ["2-4 deep, condition-specific insights about how this meal affects their body — explain the mechanism simply"],
   "betterVersion": "A concrete upgraded version naming specific ingredients to add or swap, keeping it realistic and culturally appropriate",
   "smallFix": "One ultra-specific, immediately actionable change — name exact foods, quantities, or swaps",
+  "tomorrowTip": "Based on what they ate today/recently, give one specific suggestion for tomorrow — e.g. 'You've had a carb-heavy day, tomorrow start with a protein breakfast like eggs or moong dal chilla to balance it out'",
   "gentleNote": "A warm, encouraging closing line — not preachy"
 }`;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { userProfile, mealType, mealText, mood } = await req.json();
+    const { userProfile, mealType, mealText, mood, cycleContext, recentMeals } = await req.json();
 
     const apiKey = process.env.GROQ_API_KEY?.trim();
 
@@ -108,7 +125,7 @@ export async function POST(req: NextRequest) {
     }
 
     const groq = new Groq({ apiKey });
-    const prompt = buildPrompt(userProfile, mealType, mealText, mood);
+    const prompt = buildPrompt(userProfile, mealType, mealText, mood, cycleContext, recentMeals);
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",

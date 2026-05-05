@@ -123,8 +123,79 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #08080f;
+    color: #f0f0f8;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Neon glow utilities */
+.neon-pink {
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.4), 0 0 60px rgba(255, 45, 120, 0.15);
+}
+.neon-cyan {
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 0 60px rgba(0, 245, 255, 0.15);
+}
+.neon-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.15);
+}
+.glow-text-pink {
+  text-shadow: 0 0 20px rgba(255, 45, 120, 0.8);
+}
+
+/* Glassmorphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.glass-bright {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+  border-radius: 16px;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, #ff2d78, #7b2ff7, #00f5ff);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Animated gradient background */
+.gradient-bg {
+  background: radial-gradient(ellipse at top left, rgba(255, 45, 120, 0.12) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom right, rgba(123, 47, 247, 0.12) 0%, transparent 50%),
+              radial-gradient(ellipse at center, rgba(0, 245, 255, 0.05) 0%, transparent 60%),
+              #08080f;
+}
+
+/* Neon button */
+.btn-neon {
+  background: linear-gradient(135deg, #ff2d78, #7b2ff7);
+  box-shadow: 0 0 20px rgba(255, 45, 120, 0.4);
+  transition: all 0.2s ease;
+}
+.btn-neon:hover {
+  box-shadow: 0 0 30px rgba(255, 45, 120, 0.6), 0 0 60px rgba(123, 47, 247, 0.3);
+  transform: translateY(-1px);
+}
+.btn-neon:active {
+  transform: translateY(0);
 }

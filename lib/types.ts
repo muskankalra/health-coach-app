@@ -22,6 +22,8 @@ export type CuisinePreference =
 
 export type LifestyleType = "sedentary" | "lightly_active" | "active";
 
+export type Gender = "male" | "female" | "other";
+
 export type MainGoal =
   | "better_periods"
   | "weight_loss"
@@ -34,9 +36,39 @@ export type MainGoal =
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type MoodEnergy = "low" | "okay" | "good";
 
+export type CyclePhase = "menstrual" | "follicular" | "ovulatory" | "luteal";
+
+export interface CycleInfo {
+  lastPeriodDate: string; // ISO date string YYYY-MM-DD
+  cycleLength: number;    // average cycle length in days
+}
+
+export type SymptomType =
+  | "bloating"
+  | "fatigue"
+  | "cramps"
+  | "mood_swings"
+  | "cravings"
+  | "acne"
+  | "headache"
+  | "low_energy"
+  | "brain_fog"
+  | "nausea";
+
+export interface SymptomLog {
+  id: string;
+  symptoms: SymptomType[];
+  notes?: string;
+  severity: 1 | 2 | 3; // 1=mild, 2=moderate, 3=severe
+  timestamp: number;
+}
+
 export interface UserProfile {
   name: string;
   age: number;
+  gender: Gender;
+  weight?: number; // kg
+  height?: number; // cm
   conditions: HealthCondition[];
   dietPreference: DietPreference;
   cuisinePreference: CuisinePreference;
@@ -52,7 +84,25 @@ export interface MealFeedback {
   conditionAwareFeedback: string[];
   betterVersion: string;
   smallFix: string;
+  tomorrowTip: string;
   gentleNote: string;
+}
+
+export interface MealPlanItem {
+  meal: string;
+  why: string;
+  calories: string;
+  ingredients: string[];
+  recipe: string[];
+}
+
+export interface TomorrowPlan {
+  intro: string;
+  breakfast: MealPlanItem;
+  lunch: MealPlanItem;
+  dinner: MealPlanItem;
+  snack: MealPlanItem;
+  generalTip: string;
 }
 
 export interface MealLog {
@@ -62,4 +112,44 @@ export interface MealLog {
   mood?: MoodEnergy;
   feedback: MealFeedback;
   timestamp: number;
+}
+
+export interface DayMealEntry {
+  mealType: MealType;
+  mealText: string;
+}
+
+export interface DayMealFeedback {
+  mealType: MealType;
+  mealText: string;
+  feedback: MealFeedback;
+}
+
+export interface DayAnalysis {
+  overallSummary: string;
+  dayScore: string;
+  meals: DayMealFeedback[];
+  dayPatterns: string[];
+  tomorrowPlan: string;
+  gentleNote: string;
+}
+
+export interface DayLog {
+  id: string;
+  meals: DayMealEntry[];
+  analysis: DayAnalysis;
+  timestamp: number;
+}
+
+export interface PatternInsight {
+  pattern: string;
+  explanation: string;
+  suggestion: string;
+}
+
+export interface PatternAnalysis {
+  summary: string;
+  insights: PatternInsight[];
+  positivePattern: string;
+  focusForNextWeek: string;
 }
